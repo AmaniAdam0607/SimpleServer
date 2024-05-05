@@ -1,0 +1,11 @@
+{
+  "name": "simpleserver",
+  "version": "1.0.0",
+  "description": "A Simple Server written using express.js",
+  "main": "main.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Amani Adam",
+  "license": "MIT"
+}
