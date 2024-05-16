@@ -6,43 +6,25 @@
  * "Into it"
  */
 
+const express = require('express')
+const { sendAllProducts, sendSingleProduct, searchForProductWithName, handleRouteNotFound } = require('./controllers/apiController')
+const { routes } = require("./router")
 
-const { products } = require("./data")
-const express = require('express');
+const app  = express()
 
-const app  = express();
+const portNumber = 3000
 
 //app.use(express.json()); //this is a middleware. What is a middleware??
 
 
-app.get("/api/v1/products", ( req, res ) => {
-    res.json(products) // this sends a json response, set the content header for us
-});
+app.get(routes.product_list, sendAllProducts)
 
-app.get("/api/v1/products/:id", (req, res) => {
-    //console.log(req.params)
-    const { id } = req.params;
-    //console.log(id)
-    const product = products.find((product) => product.id === Number(id) ) // find takes in a predicate
-    if ( !product ) { // the find method returned undefined
-        return res.json({"status": "FAIL", "message": "either param type or product id not found"})
-    }
-    return res.json(product)
-    //res.json(todos[id]); // not a good idea because the params are all strings
+app.get(routes.product_detail, sendSingleProduct)
+
+app.get(routes.search_product_name, searchForProductWithName)
+
+app.all(routes.all_other, handleRouteNotFound)
+
+app.listen(portNumber, () => {
+    console.log(`Server is listening on localhost:${portNumber}...`)
 })
-
-app.get("/api/v1/products/search/name", ( req, res ) => {
-    const { q } = req.query // extracts the search query
-    let searchableProducts = [...products]
-    const productMatchingQuery = []
-    searchableProducts.forEach( (product) => {
-        if (product.name.toLowerCase().includes(q.toLowerCase())){
-            return productMatchingQuery.push(product)
-        }
-    })
-    res.json(productMatchingQuery)
-})
-
-app.listen(3000, () => {
-    console.log(`Server is listening for requests!!`)
-});
