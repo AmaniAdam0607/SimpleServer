@@ -30,12 +30,7 @@ const searchForProductWithName = ( req, res ) => {
 }
 
 const handleRouteNotFound = ( req, res ) => { //needs working still
-    const allowedRoutes = [ routes.product_list, routes.product_detail, routes.search_product_name]
-    let response_ = 'ALLOWED ROUTES'
-    allowedRoutes.forEach( ( route ) => {
-        response_ += '<br>' + route
-    })
-    res.send(response_)
+    res.send(`<h6>Requested route \" ${req.url} \" is not served by this server. Plz consult the documentation of the api.</h6>`)
 }
 
 module.exports = { sendAllProducts, sendSingleProduct, searchForProductWithName, handleRouteNotFound }
