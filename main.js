@@ -15,6 +15,9 @@ const portNumber = 3000
 
 //app.use(express.json()); //this is a middleware. What is a middleware??
 
+/* app.get("/", ( req, res ) => {
+    res.render("index", { filename: "index.html"})
+}) */
 
 app.get("/api/v1/products", sendAllProducts)
 
