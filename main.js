@@ -1,32 +1,19 @@
-/**
- * A simple server to provide an API for an ecommerce site
- * The API serves product listings and simple routes for the listing manipulation
- * Written by Amani Adam
- * 
- * "Into it"
- */
-
 const express = require('express')
-const { sendAllProducts, sendSingleProduct, searchForProductWithName, handleRouteNotFound } = require('./controllers/apiController')
+const { getAllCustomers, registerCustomer, getCustomerDetail, getCustomerByName, checkIfCustomerExists } = require('./dbConnection')
 
-const app  = express()
+const portNumber = 3000;
 
-const portNumber = 3000
+const app = express()
+app.use(express.urlencoded({extended: false}))
+app.use(express.json())
 
-//app.use(express.json()); //this is a middleware. What is a middleware??
-
-/* app.get("/", ( req, res ) => {
-    res.render("index", { filename: "index.html"})
-}) */
-
-app.get("/api/v1/products", sendAllProducts)
-
-app.get("/api/v1/products/:id", sendSingleProduct)
-
-app.get("/api/v1/products/search/name", searchForProductWithName)
-
-app.all("*", handleRouteNotFound)
+app.post("/api/register", async ( req, res) => {
+    const { username, phonenumber, password } = req.body
+    const result = await getCustomerDetail( id )
+    console.log(`Username ${username} Password ${password} PhoneNumber ${phonenumber}`)
+    res.end()
+})
 
 app.listen(portNumber, () => {
-    console.log(`Server is listening on http://localhost:${portNumber} ...`)
+    console.log(`Server started at port ${portNumber}`)
 })
