@@ -81,3 +81,25 @@ const checkIfUserExists = async ( name, phonenumber ) => {
         return 0
     }
 }
+
+
+/**
+ * Get the hashed password of the user from the database
+ * @param {string} name 
+ * @param {string} phonenumber 
+ * @returns hashedPassword or null
+ */
+module.exports.getUserPassword = async ( name, phonenumber ) => {
+    let hashedPassword = ""
+    const sql = `SELECT password_hash FROM users WHERE name = ? AND phone_number = ?`
+
+    try {
+        const [results, fields]= await pool.query(sql, [ name, phonenumber])
+        hashedPassword = results[0].password_hash
+    }
+    catch ( err ) {
+        hashedPassword = null
+    }
+
+    return hashedPassword;
+}

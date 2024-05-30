@@ -1,8 +1,9 @@
 require('dotenv').config()
 
 const express = require('express')
+const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken")
-const { registerUser } = require('./dbConnection')
+const { registerUser, getUserPassword } = require('./dbConnection')
 
 const portNumber = 3000;
 
@@ -11,9 +12,20 @@ app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 
 app.post("/api/register", async ( req, res) => {
+
+    let hashedPassword = ''
+
     const { username, phonenumber, password } = req.body
-    
-    const op = await registerUser(username, phonenumber, password)
+
+    try {
+        const salt = await bcrypt.genSalt()
+        hashedPassword = await bcrypt.hash(password, salt)
+    }
+    catch ( err ) {
+        res.json({"STATUS": "FAIL", "MESSAGE": "Internal Server Error"})
+    }
+
+    const op = await registerUser(username, phonenumber, hashedPassword)
 
     if ( op === 1 ) {
         res.json({"STATUS": "SUCCESSFUL", "MESSAGE": "User registered successfully"})
@@ -27,16 +39,26 @@ app.post("/api/register", async ( req, res) => {
 })
 
 app.post("/api/login", async ( req, res ) => {
-    // Authenticate user
-    // -- Check if user exists in the database
-    // -- Check if the supplied password, name, and phone number marches the one in the database
-
+    
     const { username, phonenumber, password } = req.body
-    const user = { name: username, phonenumber: phonenumber}
 
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+    const hashedPassword = await getUserPassword( username, phonenumber )
 
-    res.json({ accessToken: accessToken })
+    if (!( hashedPassword === null )) {
+        if ( await bcrypt.compare(password, hashedPassword) ) {
+            // create token if the password is correct
+            const user = { name: username, phonenumber: phonenumber}
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET)
+            res.json({ accessToken: accessToken })
+        }
+        else {
+            res.json({"STATUS": "FAIL", "MESSAGE": "Wrong Password"})
+        }
+    }
+    else {
+        res.json({"STATUS": "FAIL", "MESSAGE": "Internal Server Error"})
+    }
+    
 
 })
 
@@ -51,12 +73,12 @@ function authenticateToken(req, res, next) {
     const token = authHeader && authHeader.split(' ')[1] // return token only if we have the auth header
 
     if ( token == null ) {
-        return res.sendStatus(401)
+        return res.json({"STATUS": "FAIL", "MESSAGE": "Please provide auth token"})
     }
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if ( err ) {
-            return res.sendStatus(403)
+            return res.json({"STATUS": "FAIL", "MESSAGE": "Please provide valid auth token"})
         }
         req.user = user
         next()

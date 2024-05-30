@@ -4,7 +4,6 @@
   "description": "A Simple Server written using express.js",
   "main": "main.js",
   "scripts": {
-    "test": "node test.js",
     "server": "nodemon main.js"
   },
   "author": "Amani Adam",
