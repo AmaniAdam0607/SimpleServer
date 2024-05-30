@@ -2,7 +2,7 @@ require('dotenv').config()
 
 const express = require('express')
 const jwt = require("jsonwebtoken")
-const { getAllCustomers, registerCustomer, getCustomerDetail, getCustomerByName, checkIfCustomerExists } = require('./dbConnection')
+const { registerUser } = require('./dbConnection')
 
 const portNumber = 3000;
 
@@ -12,11 +12,18 @@ app.use(express.json())
 
 app.post("/api/register", async ( req, res) => {
     const { username, phonenumber, password } = req.body
-    // Check if user already in the database
-    // If user already in the database, return a json response with a status FAIL and a MESSAGE saying 'Account withe the given credentials already exists'
-    // If user is not in the database write a new user into the database with the role of 'user'
-    console.log(`Username ${username} Password ${password} PhoneNumber ${phonenumber}`)
-    res.end()
+    
+    const op = await registerUser(username, phonenumber, password)
+
+    if ( op === 1 ) {
+        res.json({"STATUS": "SUCCESSFUL", "MESSAGE": "User registered successfully"})
+    }
+    if ( op === 2 ) {
+        res.json({"STATUS": "FAIL", "MESSAGE": "User already exists."})
+    }
+    if ( op === 0 ) {
+        res.json({"STATUS": "FAIL", "MESSAGE": "Internal Server Error"})
+    }
 })
 
 app.post("/api/login", async ( req, res ) => {
